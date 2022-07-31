@@ -26,7 +26,7 @@ public class Modeling implements Runnable {
     }
 
     private static void startGame() throws InterruptedException {
-        for (int n = 0; n < 5; n++) {
+        for (int n = 0; n < config.getInt("numberMoves"); n++) {
             for (int i = 0; i < Island.maxX; i++) {
                 for (int j = 0; j < Island.maxY; j++) {
                     Set<Animal> animalSet = Island.cells[i][j].getAnimalListOnCell();
@@ -34,15 +34,20 @@ public class Modeling implements Runnable {
                         for (Animal animal :
                                 animalSet) {
                             Thread thread = new Thread(new Modeling(animal));
+                            threads.add(thread);
                             thread.start();
-                            thread.join();
                         }
                     }
                 }
             }
-
-            threads = new ArrayList<>() {
-            };
+            threads.forEach(thread -> {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            threads = new ArrayList<>();
             Statistic.printStatsPerTurn();
             Thread.sleep(5000);
         }
@@ -51,10 +56,14 @@ public class Modeling implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Moving");
         this.animal.move();
 
-        System.out.println("Eating");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        
         this.animal.action();
 
     }

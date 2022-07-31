@@ -49,17 +49,13 @@ public abstract class Animal {
         this.statistic.setCurrentCell(cell);
     }
 
-    private void eat() {
-        System.out.println("Кто-кто ест");
-
+    private synchronized void eat() {
         if (this instanceof Herbivores && this.cell.getPlantsOnCell() > 0) {
-
             Cell.removePlantsOnCell(this.cell);
             this.currentEat += 1;
             return;
         }
         if (this.cell.getAnimalListOnCell().size() <= 1) return;
-
         Set<Animal> animalsOnCell = cell.getAnimalListOnCell();
         Animal sacrifice = null;
         for (Animal victim :
@@ -73,7 +69,6 @@ public abstract class Animal {
         if (sacrifice == null) return;
 
         int randomEat = ThreadLocalRandom.current().nextInt(100) + 1;
-        System.out.println(randomEat);
         if (randomEat > this.canEat.get(sacrifice.id)) {
             this.currentEat += sacrifice.weight;
             this.statistic.setEat(true);
